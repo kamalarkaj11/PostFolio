@@ -1,0 +1,523 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Machine</title>
+
+    <!-- Internal CSS for complete styling -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .atm-container {
+            background: linear-gradient(145deg, #2a2a4a, #1e1e3a);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+
+            to {
+                box-shadow: 0 25px 80px rgba(0, 255, 150, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .atm-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 255, 150, 0.3);
+        }
+
+        .atm-icon {
+            font-size: 2.5rem;
+            color: #00ff96;
+            text-shadow: 0 0 20px rgba(0, 255, 150, 0.5);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .atm-header h1 {
+            color: #ffffff;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .screen {
+            display: none;
+            min-height: 400px;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .screen-content {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .atm-icon-large {
+            font-size: 4rem;
+            color: #00ff96;
+            text-shadow: 0 0 30px rgba(0, 255, 150, 0.7);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .screen-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .screen-subtitle {
+            color: #a0a0c0;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .atm-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            border-radius: 15px;
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .atm-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .atm-input:focus {
+            outline: none;
+            border-color: #00ff96;
+            box-shadow: 0 0 25px rgba(0, 255, 150, 0.5);
+            transform: scale(1.02);
+        }
+
+        .btn {
+            padding: 18px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #00ff96, #00cc77);
+            color: #0f0f23;
+            box-shadow: 0 10px 30px rgba(0, 255, 150, 0.4);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 255, 150, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .display-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-section {
+            margin: 20px 0;
+        }
+
+        .amount-label {
+            color: #a0a0c0;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 20px;
+            font-size: 1rem;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(145deg, rgba(0, 255, 150, 0.2), rgba(0, 255, 150, 0.1));
+            border-color: #00ff96;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 150, 0.3);
+        }
+
+        .action-btn.hidden {
+            display: none;
+        }
+
+        .check-balance-btn {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #4facfe, #00f2fe);
+            border-color: rgba(79, 172, 254, 0.5);
+        }
+
+        .check-balance-btn:hover {
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .deposit-btn {
+            background: linear-gradient(145deg, #43e97b, #38f9d7);
+            border-color: rgba(67, 233, 123, 0.5);
+        }
+
+        .deposit-btn:hover {
+            box-shadow: 0 10px 25px rgba(67, 233, 123, 0.4);
+        }
+
+        .withdraw-btn {
+            background: linear-gradient(145deg, #fa709a, #fee140);
+            border-color: rgba(250, 112, 154, 0.5);
+        }
+
+        .withdraw-btn:hover {
+            box-shadow: 0 10px 25px rgba(250, 112, 154, 0.4);
+        }
+
+        .exit-btn {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .exit-btn:hover {
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #confirmBtn {
+            grid-column: span 2;
+            margin-top: 15px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .atm-container {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .atm-icon-large {
+                font-size: 3rem;
+            }
+        }
+
+        /* Button ripple effect */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+
+    <!-- Font Awesome for Icons (matching home.html) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="atm-container">
+        <div class="atm-header">
+            <span class="atm-icon">ATM</span>
+            <h1>ATM Machine</h1>
+        </div>
+
+        <div id="pinScreen" class="screen active">
+            <div class="screen-content">
+                <i class="fas fa-lock atm-icon-large"></i>
+                <h2 class="screen-title">Welcome to ATM</h2>
+                <p class="screen-subtitle">Enter your 4-digit PIN:</p>
+                <div class="input-group">
+                    <input type="password" id="pinInput" class="atm-input" maxlength="4" placeholder="****">
+                    <button class="btn btn-primary verify-pin-btn" onclick="verifyPin()">
+                        <span class="btn-text">Verify PIN</span>
+                        <span class="btn-icon"><i class="fas fa-arrow-right"></i></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainScreen" class="screen">
+            <div class="screen-content">
+                <i class="fas fa-credit-card atm-icon-large"></i>
+                <h2 class="screen-title">Account Dashboard</h2>
+                <div class="display-area" id="display"></div>
+
+                <div class="input-section hidden" id="amountSection">
+                    <p class="amount-label" id="amountLabel">Enter Amount:</p>
+                    <input type="number" id="amountInput" class="atm-input" placeholder="Enter amount">
+                    <button id="confirmBtn" class="btn btn-primary hidden" onclick="confirmTransaction()">
+                        <i class="fas fa-check"></i>
+                        <span>Confirm</span>
+                    </button>
+                </div>
+
+                <div class="button-group" id="actionButtons">
+                    <button class="action-btn check-balance-btn" id="checkBalance" onclick="checkBalance()">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>Check Balance</span>
+                    </button>
+                    <button class="action-btn deposit-btn" id="deposit" onclick="showDeposit()">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Deposit</span>
+                    </button>
+                    <button class="action-btn withdraw-btn" id="withdraw" onclick="showWithdraw()">
+                        <i class="fas fa-minus-circle"></i>
+                        <span>Withdraw</span>
+                    </button>
+                    <button class="action-btn exit-btn" id="exit" onclick="exitATM()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Exit</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ATM Variables
+        var balance = 100000;
+        var pin = 2540;
+        var isAuthenticated = false;
+        var currentAction = '';  // 'deposit' or 'withdraw'
+
+        // DOM Elements
+        var pinScreen = document.getElementById("pinScreen");
+        var mainScreen = document.getElementById("mainScreen");
+        var pinInput = document.getElementById("pinInput");
+        var display = document.getElementById("display");
+        var amountSection = document.getElementById("amountSection");
+        var amountInput = document.getElementById("amountInput");
+        var amountLabel = document.getElementById("amountLabel");
+        var confirmBtn = document.getElementById("confirmBtn");
+        var actionButtons = document.getElementById("actionButtons");
+
+        // Verify PIN
+        function verifyPin() {
+            var enteredPin = Number(pinInput.value);
+            if (enteredPin === pin) {
+                isAuthenticated = true;
+                pinScreen.classList.remove('active');
+                pinScreen.style.display = "none";
+                mainScreen.classList.add('active');
+                mainScreen.style.display = "block";
+                display.innerHTML = "Login Successful! Select an option.";
+                display.style.color = "#ffffff";
+            } else {
+                alert("Invalid PIN! Please try again. Default PIN: 2540");
+                pinInput.value = "";
+            }
+        }
+
+        // Check Balance
+        function checkBalance() {
+            if (!isAuthenticated) {
+                display.innerHTML = "Please enter PIN first!";
+                return;
+            }
+            display.innerHTML = "Your Current Balance: Rs. " + balance.toLocaleString();
+            display.style.color = "#ffff00";
+            hideAmountSection();
+        }
+
+        // Show Deposit Input
+        function showDeposit() {
+            if (!isAuthenticated) return;
+            currentAction = 'deposit';
+            amountLabel.textContent = "Enter Deposit Amount:";
+            amountInput.placeholder = "Minimum Rs. 100";
+            showAmountSection();
+            amountInput.focus();
+        }
+
+        // Show Withdraw Input
+        function showWithdraw() {
+            if (!isAuthenticated) return;
+            currentAction = 'withdraw';
+            amountLabel.textContent = "Enter Withdraw Amount:";
+            amountInput.placeholder = "Available: Rs. " + balance.toLocaleString();
+            showAmountSection();
+            amountInput.focus();
+        }
+
+        // Show Amount Section
+        function showAmountSection() {
+            amountSection.classList.remove('hidden');
+            confirmBtn.classList.remove('hidden');
+            actionButtons.style.display = 'none';
+            display.innerHTML = "Enter amount and press Confirm";
+        }
+
+        // Hide Amount Section
+        function hideAmountSection() {
+            amountSection.classList.add('hidden');
+            confirmBtn.classList.add('hidden');
+            actionButtons.style.display = 'grid';
+            amountInput.value = '';
+        }
+
+        // Confirm Transaction
+        function confirmTransaction() {
+            var amount = parseFloat(amountInput.value);
+            if (isNaN(amount) || amount <= 0) {
+                display.innerHTML = "Please enter a valid amount!";
+                display.style.color = "#ff6b6b";
+                return;
+            }
+
+            if (currentAction === 'deposit') {
+                balance += amount;
+                display.innerHTML = `Deposit Successful! New Balance: Rs. ${balance.toLocaleString()}`;
+                display.style.color = "#00ff96";
+            } else if (currentAction === 'withdraw') {
+                if (amount > balance) {
+                    display.innerHTML = "Insufficient Balance!";
+                    display.style.color = "#ff6b6b";
+                    return;
+                }
+                balance -= amount;
+                display.innerHTML = `Withdrawal Successful! New Balance: Rs. ${balance.toLocaleString()}`;
+                display.style.color = "#00ff96";
+            }
+
+            hideAmountSection();
+            currentAction = '';
+        }
+
+        // Exit ATM
+        function exitATM() {
+            display.innerHTML = "Thank you for using ATM! Goodbye.";
+            display.style.color = "#ffffff";
+            setTimeout(function () {
+                mainScreen.style.display = "none";
+                pinScreen.classList.add('active');
+                pinScreen.style.display = "block";
+                pinInput.value = "";
+                amountInput.value = "";
+                display.innerHTML = "";
+                isAuthenticated = false;
+                hideAmountSection();
+                currentAction = '';
+            }, 2000);
+        }
+
+        // Enter key support
+        amountInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                confirmTransaction();
+            }
+        });
+
+        pinInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verifyPin();
+            }
+        });
+    </script>
+</body>
+
+</html>
